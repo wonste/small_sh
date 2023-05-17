@@ -111,7 +111,8 @@ mainloop:
         //fprintf(stderr, "%s\n", wordarr[i]);
         }
       // parsing?
-
+      for(){
+      }
 
       // built in commands
       if (wordarr[0] == NULL){
