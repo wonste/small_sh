@@ -111,8 +111,7 @@ mainloop:
         //fprintf(stderr, "%s\n", wordarr[i]);
         }
       // parsing?
-      for(){
-      }
+      
 
       // built in commands
       if (wordarr[0] == NULL){
@@ -233,30 +232,33 @@ size_t wordsplit(char const *line){
 
 char param_scan(char const *phrase, char **start, char **end)
 {
-  static char *prev;
-
+  static char const *prev;
   if(!phrase) phrase = prev;
 
   char ret = 0;
-  *start = NULL;
-  *end = NULL;
+  *start = 0;
+  *end = 0;
 
-  char *stringThis = strchr(phrase, '$');
+  for(char *stringThis = phrase; *stringThis && !ret; ++stringThis){
+    stringThis = strchr(stringThis, '$');
+    if(!stringThis) break;
 
-  if(stringThis){
-    char *ch = strchr("$!?", stringThis[1]);
-    if(ch){
-      ret = *ch;
-      *start = stringThis;
-      *end = stringThis + 2;
-    }
-    else if(stringThis[1] == '{'){
-      char *charEnd = strchr(stringThis + 2, '}');
-      if(charEnd){
-        ret = '{';
+    switch(stringThis[1]){
+      case '$':
+      case '!':
+      case '?':
+        ret = stringThis[1];
         *start = stringThis;
-        *end = charEnd + 1;
-      }
+        *end = stringThis + 2;
+        break;
+      case '{':;
+        char *e = strchar(stringThis + 2, '}');
+        if (e){
+          ret = stringThis[1];
+          *start = stringThis;
+          *end = e + 1;
+        }
+        break;
     }
   }
   prev = *end;
