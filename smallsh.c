@@ -239,7 +239,7 @@ char param_scan(char const *phrase, char **start, char **end)
   *start = 0;
   *end = 0;
 
-  for(char *stringThis = phrase; *stringThis && !ret; ++stringThis){
+  for(char const *stringThis = phrase; *stringThis && !ret; ++stringThis){
     stringThis = strchr(stringThis, '$');
     if(!stringThis) break;
 
@@ -252,7 +252,7 @@ char param_scan(char const *phrase, char **start, char **end)
         *end = stringThis + 2;
         break;
       case '{':;
-        char *e = strchar(stringThis + 2, '}');
+        char *e = strchr(stringThis + 2, '}');
         if (e){
           ret = stringThis[1];
           *start = stringThis;
