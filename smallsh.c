@@ -300,35 +300,34 @@ size_t wordsplit(char const *line){
   return wordarr_index;
 }
 
-char param_scan(char const *phrase, char **start, char **end)
+char
+param_scan(char const *word, char const **start, char const **end)
 {
   static char const *prev;
-  if(!phrase) phrase = prev;
-
+  if (!word) word = prev;
+  
   char ret = 0;
   *start = 0;
   *end = 0;
-
-  for(char const *stringThis = phrase; *stringThis && !ret; ++stringThis){
-    stringThis = strchr(stringThis, '$');
-    if(!stringThis) break;
-
-    switch(stringThis[1]){
-      case '$':
-      case '!':
-      case '?':
-        ret = stringThis[1];
-        *start = stringThis;
-        *end = stringThis + 2;
-        break;
-      case '{':;
-        char *e = strchr(stringThis + 2, '}');
-        if (e){
-          ret = stringThis[1];
-          *start = stringThis;
-          *end = e + 1;
-        }
-        break;
+  for (char const *s = word; *s && !ret; ++s) {
+    s = strchr(s, '$');
+    if (!s) break;
+    switch (s[1]) {
+    case '$':
+    case '!':
+    case '?':
+      ret = s[1];
+      *start = s;
+      *end = s + 2;
+      break;
+    case '{':;
+      char *e = strchr(s + 2, '}');
+      if (e) {
+        ret = s[1];
+        *start = s;
+        *end = e + 1;
+      }
+      break;
     }
   }
   prev = *end;
@@ -362,7 +361,7 @@ char *build_str(char const *start, char const *end){
 
 char *expand(char const *word){
   char const *position = word;
-  char *start, *end;
+  char const *start, *end;
   char ch = param_scan(position, &start, &end);
   build_str(NULL, NULL);
   build_str(position, start);
