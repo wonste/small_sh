@@ -57,11 +57,24 @@ int main(int argc, char *argv[])
     pid_t spawnpid = -5;
     int bgChildStatus;
     int bg_child = 0;
-    //int mathResult = 0;
-    //int signum = 0;
+    int mathResult = 0;
+    int signum = 0;
 
     for (;;){
 mainloop:
+      // background processes
+      while((bg_child = waitpid(0, &bgChildStatus, WNOHANG | WUNTRACED)) > 0){
+
+        if(WIFEXITED(bgChildStatus)){
+          fprintf(stderr, "Child process %jd done. Exit status %d.\n", (intmax_t) bg_child, WEXITSTATUS(bgChildStatus));
+        } else if (WIFSIGNALED(bgChildStatus)){
+          signum = WTERMSIG(bgChildStatus);
+          fprintf(stderr, "Child process %jd done. Signaled %d.\n", (intmax_t)bg_child, signum);
+        } else if (WIFSTOPPED(bgChildStatus)){
+          kill(bg_child, SIGCONT);
+          fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t)bg_child);
+        }
+      }
 
       for(int z=0; z < MAX_WORDS; z++){
         // reset array for next loop/iteration
@@ -181,8 +194,8 @@ exitjump:
           case 0:
             // parse for files to read, write, and append
             // this is because you want to truncate repeat redirection operators
-            int n = 0; // index for array_to_feed
-            for(int i=0;i < num_words; i++){
+            n = 0; // index for array_to_feed
+            for(int i = 0 ;i < num_words; i++){
               // < "infile"
               if (strcmp(wordarr[i], "<") == 0){
                 if(wordarr[i+1] != NULL){
@@ -237,7 +250,7 @@ exitjump:
                } else{
                  // add to the clean array
 
-                 array_to_feed[n] = wordarr[i];
+                 array_to_feed[n] = strdup(wordarr[i]);
                  n++;
                }
             
@@ -250,6 +263,26 @@ exitjump:
             break;
 
           default:
+            if(background == 0){
+              waitpid(spawnpid, &bgChildStatus, WUNTRACED);
+
+              if(WIFSTOPPED(bgChildStatus)){
+                bg_pid = malloc(8);
+                sprintf(bg_pid, "%d", spawnpid);
+                kill(spawnpid, SIGCONT);
+                waitpid(spawnpid, &bgChildStatus, WNOHANG | WUNTRACED);
+                fprintf(stderr, "Child process %jd stopped. Continuing. \n", (intmax_t)spawnpid);
+              } if(WIFSIGNALED(bgChildStatus)){
+                mathResult = 128 + WTERMSIG(bgChildStatus);
+                fg_exit = malloc(8);
+                sprintf(fg_exit, "%d", mathResult);
+              } if(WIFEXITED(bgChildStatus)){
+                fg_exit = malloc(8);
+                sprintf(fg_exit, "%d", WEXITSTATUS(bgChildStatus));
+              }
+              break;
+
+            }
             if(background == 1){
               bg_pid = malloc(8);
               sprintf(bg_pid, "%d", spawnpid);
