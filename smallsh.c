@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     char *line = NULL;
     size_t n = 0;
     char *array_to_feed[513];
-    int background = 1;
+    int background = 0;
     pid_t spawnpid = -5;
     int bgChildStatus;
     int bg_child = 0;
@@ -63,18 +63,18 @@ int main(int argc, char *argv[])
     for (;;){
 mainloop:
       // background processes
-      while((bg_child = waitpid(0, &bgChildStatus, WNOHANG | WUNTRACED)) > 0){
+//      while((bg_child = waitpid(0, &bgChildStatus, WNOHANG | WUNTRACED)) > 0){
 
-        if(WIFEXITED(bgChildStatus)){
-          fprintf(stderr, "Child process %jd done. Exit status %d.\n", (intmax_t) bg_child, WEXITSTATUS(bgChildStatus));
-        } else if (WIFSIGNALED(bgChildStatus)){
-          signum = WTERMSIG(bgChildStatus);
-          fprintf(stderr, "Child process %jd done. Signaled %d.\n", (intmax_t)bg_child, signum);
-        } else if (WIFSTOPPED(bgChildStatus)){
-          kill(bg_child, SIGCONT);
-          fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t)bg_child);
-        }
-      }
+  //      if(WIFEXITED(bgChildStatus)){
+  //        fprintf(stderr, "Child process %jd done. Exit status %d.\n", (intmax_t) bg_child, WEXITSTATUS(bgChildStatus));
+  //      } else if (WIFSIGNALED(bgChildStatus)){
+  //        signum = WTERMSIG(bgChildStatus);
+  //        fprintf(stderr, "Child process %jd done. Signaled %d.\n", (intmax_t)bg_child, signum);
+  //      } else if (WIFSTOPPED(bgChildStatus)){
+  //       kill(bg_child, SIGCONT);
+  //        fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t)bg_child);
+  //      }
+  //    }
 
       for(int z=0; z < MAX_WORDS; z++){
         // reset array for next loop/iteration
@@ -109,10 +109,10 @@ mainloop:
       if (line_length == -1){
         if(errno == EINTR){
           // error interrupt
-          printf("\n");
           clearerr(stdin);
+          fprintf(stderr, "\n");
           errno = 0;
-          continue;
+          goto mainloop;
         }
       }
 
@@ -245,7 +245,7 @@ exitjump:
                 i++;
               } // & "background"
                else if (strcmp(wordarr[i], "&")==0){
-                 background = 0; // flip on the flag
+                 background = 1; // flip on the flag
 
                } else{
                  // add to the clean array
@@ -263,7 +263,7 @@ exitjump:
             break;
 
           default:
-            if(background == 0){
+            /*if(background == 0){
               waitpid(spawnpid, &bgChildStatus, WUNTRACED);
 
               if(WIFSTOPPED(bgChildStatus)){
@@ -282,7 +282,7 @@ exitjump:
               }
               break;
 
-            }
+            }*/
             if(background == 1){
               bg_pid = malloc(8);
               sprintf(bg_pid, "%d", spawnpid);
