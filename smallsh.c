@@ -183,6 +183,11 @@ exitjump:
       } // FORKING? CHILD?
       else{
         // non-built in?
+        if(strcmp(wordarr[num_words - 1], "&")==0){
+          background = 1;
+          wordarr[num_words - 1] = NULL;
+          num_words--;
+        }
         spawnpid = fork();
         switch(spawnpid){
 
@@ -246,12 +251,7 @@ exitjump:
                   }
                 }
                 i++;
-              } // & "background"
-               else if (strcmp(wordarr[i], "&")==0){
-                 background = 1; // flip on the flag
-                 // wordarr[i] = NULL;
-
-               } else{
+              }else{
                  // add to the clean array
 
                  array_to_feed[j] = strdup(wordarr[i]);
@@ -271,6 +271,7 @@ exitjump:
               waitpid(spawnpid, &bgChildStatus, WUNTRACED);
 
               if(WIFSTOPPED(bgChildStatus)){
+
                 bg_pid = malloc(8);
                 sprintf(bg_pid, "%d", spawnpid);
                 kill(spawnpid, SIGCONT);
@@ -278,11 +279,13 @@ exitjump:
                 fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t)spawnpid);
 
               } if(WIFSIGNALED(bgChildStatus)){
+
                 mathResult = 128 + WTERMSIG(bgChildStatus);
                 fg_exit = malloc(8);
                 sprintf(fg_exit, "%d", mathResult);
 
               } if(WIFEXITED(bgChildStatus)){
+
                 fg_exit = malloc(8);
                 sprintf(fg_exit, "%d", WEXITSTATUS(bgChildStatus));
 
@@ -291,9 +294,11 @@ exitjump:
 
             }
             if(background == 1){
+              // let it goooo
               bg_pid = malloc(8);
               sprintf(bg_pid, "%d", spawnpid);
               background = 0;
+
               goto mainloop;
             }
         }
