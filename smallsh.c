@@ -19,7 +19,7 @@
 // functions
 char *wordarr[MAX_WORDS];
 size_t wordsplit(char const *line);
-char *expand(char const *phrase);
+char *expand(char const *word);
 
 // GLOBALS
 char *smallsh_pid = NULL;
