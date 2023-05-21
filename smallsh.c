@@ -242,7 +242,7 @@ exitjump:
               else if(strcmp(wordarr[i], ">>") == 0){
 
                 if(wordarr[i+1] != NULL){
-                  int appendTHIS = open(wordarr[i+1], O_APPEND | O_CREAT, 0777);
+                  int appendTHIS = open(wordarr[i+1], O_WRONLY| O_APPEND | O_CREAT, 0777);
 
                   if(appendTHIS == -1){
                     fprintf(stderr, "append file open()\n");
