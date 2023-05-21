@@ -22,9 +22,9 @@ size_t wordsplit(char const *line);
 char *expand(char const *word);
 
 // GLOBALS
-char *smallsh_pid = NULL;
-char *fg_exit = "0";
-char *bg_pid = "";
+char *smallsh_pid = NULL;   // $$
+char *fg_exit = "0";        // $?
+char *bg_pid = "";          // $!
 
 
 
@@ -72,7 +72,7 @@ mainloop:
           signum = WTERMSIG(bgChildStatus);
           fprintf(stderr, "Child process %jd done. Signaled %d.\n", (intmax_t)bg_child, signum);
         } else if (WIFSTOPPED(bgChildStatus)){
-         kill(bg_child, SIGCONT);
+          kill(bg_child, SIGCONT);
           fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t)bg_child);
         }
       }
@@ -216,6 +216,7 @@ exitjump:
                 i++;
               } // > "outfile" 
               else if(strcmp(wordarr[i], ">")==0){
+
                 if(wordarr[i+1] != NULL){
                   int letmeout = open(wordarr[i+1], O_WRONLY | O_CREAT | O_TRUNC, 0777);
                   if(letmeout == -1){
@@ -231,6 +232,7 @@ exitjump:
                 i++;
               } // >> "appendTHIS"
               else if(strcmp(wordarr[i], ">>") == 0){
+
                 if(wordarr[i+1] != NULL){
                   int appendTHIS = open(wordarr[i+1], O_APPEND | O_CREAT | O_TRUNC, 0777);
                   if(appendTHIS == -1){
@@ -247,6 +249,7 @@ exitjump:
               } // & "background"
                else if (strcmp(wordarr[i], "&")==0){
                  background = 1; // flip on the flag
+                 // wordarr[i] = NULL;
 
                } else{
                  // add to the clean array
@@ -255,8 +258,6 @@ exitjump:
                  j++;
                  array_to_feed[j] = NULL;
                }
-            // array_to_feed[n] = NULL
-            // maybe null here?
             
             }
 
@@ -410,11 +411,13 @@ char *expand(char const *word){
     if(ch == '!'){
       build_str(bg_pid, NULL);
     } else if (ch == '$'){
+      smallsh_pid = malloc(8);
+      sprintf(smallsh_pid, "%d", getpid());
       build_str(smallsh_pid, NULL);
     } else if (ch == '?'){
       build_str(fg_exit, NULL);
     } else if (ch == '{'){
-      char param_array[100] = {'\0'};
+      char param_array[200] = {'\0'};
       strncpy(param_array, start + 2, (end - 1) - (start + 2));
       char* env_var = getenv(param_array);
       if (env_var == NULL) build_str("", NULL);
