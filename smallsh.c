@@ -204,6 +204,7 @@ exitjump:
               
               // < "infile"
               if (strcmp(wordarr[i], "<") == 0){
+
                 if(wordarr[i+1] != NULL){
                   int letmein = open(wordarr[i+1], O_RDONLY);
 
@@ -220,14 +221,16 @@ exitjump:
                 } 
                 i++;
               } // > "outfile" 
-              else if(strcmp(wordarr[i], ">")==0){
+              else if(strcmp(wordarr[i], ">") == 0){
 
                 if(wordarr[i+1] != NULL){
                   int letmeout = open(wordarr[i+1], O_WRONLY | O_CREAT | O_TRUNC, 0777);
+
                   if(letmeout == -1){
                     fprintf(stderr, "outfile open()\n");
                     exit(1);
                   }
+
                   int resultOut = dup2(letmeout, 1);
                   if(resultOut == -1){
                     fprintf(stderr, "outfile dup2\n");
@@ -239,11 +242,13 @@ exitjump:
               else if(strcmp(wordarr[i], ">>") == 0){
 
                 if(wordarr[i+1] != NULL){
-                  int appendTHIS = open(wordarr[i+1], O_APPEND | O_CREAT | O_TRUNC, 0777);
+                  int appendTHIS = open(wordarr[i+1], O_APPEND | O_CREAT, 0777);
+
                   if(appendTHIS == -1){
                     fprintf(stderr, "append file open()\n");
                     exit(1);
                   }
+
                   int appendVal = dup2(appendTHIS, 1);
                   if(appendVal == -1){
                     fprintf(stderr, "append dup2\n");
@@ -251,7 +256,7 @@ exitjump:
                   }
                 }
                 i++;
-              }else{
+              } else{
                  // add to the clean array
 
                  array_to_feed[j] = strdup(wordarr[i]);
@@ -323,7 +328,7 @@ size_t wordsplit(char const *line){
 
     for(;*word && !isspace(*word); ++word){
 
-      if(wordarr_index == '\\'){
+      if(*word == '\\'){
         ++word;
       }
       // read a word
