@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     for (;;){
 mainloop:
       // background processes
-/*      while((bg_child = waitpid(0, &bgChildStatus, WNOHANG | WUNTRACED)) > 0){
+      while((bg_child = waitpid(0, &bgChildStatus, WNOHANG | WUNTRACED)) > 0){
 
         if(WIFEXITED(bgChildStatus)){
           fprintf(stderr, "Child process %jd done. Exit status %d.\n", (intmax_t) bg_child, WEXITSTATUS(bgChildStatus));
@@ -75,7 +75,7 @@ mainloop:
          kill(bg_child, SIGCONT);
           fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t)bg_child);
         }
-      }*/
+      }
 
       for(int i=0; i < MAX_WORDS; i++){
         // reset array for next loop/iteration
@@ -83,7 +83,6 @@ mainloop:
         wordarr[i] = NULL;
       }
 
-      
 
       if (input == stdin){
         /*Check for Prompt String 1 aka PS1*/
@@ -254,9 +253,11 @@ exitjump:
 
                  array_to_feed[j] = strdup(wordarr[i]);
                  j++;
+                 array_to_feed[j] = NULL;
                }
+            // array_to_feed[n] = NULL
+            // maybe null here?
             
-
             }
 
             execvp(array_to_feed[0], array_to_feed);
@@ -265,7 +266,7 @@ exitjump:
             break;
 
           default:
-            /*if(background == 0){
+            if(background == 0){
               waitpid(spawnpid, &bgChildStatus, WUNTRACED);
 
               if(WIFSTOPPED(bgChildStatus)){
@@ -273,18 +274,21 @@ exitjump:
                 sprintf(bg_pid, "%d", spawnpid);
                 kill(spawnpid, SIGCONT);
                 waitpid(spawnpid, &bgChildStatus, WNOHANG | WUNTRACED);
-                fprintf(stderr, "Child process %jd stopped. Continuing. \n", (intmax_t)spawnpid);
+                fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t)spawnpid);
+
               } if(WIFSIGNALED(bgChildStatus)){
                 mathResult = 128 + WTERMSIG(bgChildStatus);
                 fg_exit = malloc(8);
                 sprintf(fg_exit, "%d", mathResult);
+
               } if(WIFEXITED(bgChildStatus)){
                 fg_exit = malloc(8);
                 sprintf(fg_exit, "%d", WEXITSTATUS(bgChildStatus));
+
               }
               break;
 
-            }*/
+            }
             if(background == 1){
               bg_pid = malloc(8);
               sprintf(bg_pid, "%d", spawnpid);
