@@ -52,34 +52,35 @@ int main(int argc, char *argv[])
 
     char *line = NULL;
     size_t n = 0;
-    char *array_to_feed[513];
+    char *array_to_feed[MAX_WORDS];
     int background = 0;
     pid_t spawnpid = -5;
     int bgChildStatus;
     int bg_child = 0;
     int mathResult = 0;
     int signum = 0;
+    int j;
 
     for (;;){
 mainloop:
       // background processes
-//      while((bg_child = waitpid(0, &bgChildStatus, WNOHANG | WUNTRACED)) > 0){
+/*      while((bg_child = waitpid(0, &bgChildStatus, WNOHANG | WUNTRACED)) > 0){
 
-  //      if(WIFEXITED(bgChildStatus)){
-  //        fprintf(stderr, "Child process %jd done. Exit status %d.\n", (intmax_t) bg_child, WEXITSTATUS(bgChildStatus));
-  //      } else if (WIFSIGNALED(bgChildStatus)){
-  //        signum = WTERMSIG(bgChildStatus);
-  //        fprintf(stderr, "Child process %jd done. Signaled %d.\n", (intmax_t)bg_child, signum);
-  //      } else if (WIFSTOPPED(bgChildStatus)){
-  //       kill(bg_child, SIGCONT);
-  //        fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t)bg_child);
-  //      }
-  //    }
+        if(WIFEXITED(bgChildStatus)){
+          fprintf(stderr, "Child process %jd done. Exit status %d.\n", (intmax_t) bg_child, WEXITSTATUS(bgChildStatus));
+        } else if (WIFSIGNALED(bgChildStatus)){
+          signum = WTERMSIG(bgChildStatus);
+          fprintf(stderr, "Child process %jd done. Signaled %d.\n", (intmax_t)bg_child, signum);
+        } else if (WIFSTOPPED(bgChildStatus)){
+         kill(bg_child, SIGCONT);
+          fprintf(stderr, "Child process %jd stopped. Continuing.\n", (intmax_t)bg_child);
+        }
+      }*/
 
-      for(int z=0; z < MAX_WORDS; z++){
+      for(int i=0; i < MAX_WORDS; i++){
         // reset array for next loop/iteration
-        if(wordarr[z]) free(wordarr[z]);
-        wordarr[z] = NULL;
+        if(wordarr[i]) free(wordarr[i]);
+        wordarr[i] = NULL;
       }
 
       
@@ -194,8 +195,9 @@ exitjump:
           case 0:
             // parse for files to read, write, and append
             // this is because you want to truncate repeat redirection operators
-            n = 0; // index for array_to_feed
-            for(int i = 0 ;i < num_words; i++){
+            j = 0; // index for array_to_feed
+            for(int i = 0 ; i < num_words; i++){
+              
               // < "infile"
               if (strcmp(wordarr[i], "<") == 0){
                 if(wordarr[i+1] != NULL){
@@ -250,8 +252,8 @@ exitjump:
                } else{
                  // add to the clean array
 
-                 array_to_feed[n] = strdup(wordarr[i]);
-                 n++;
+                 array_to_feed[j] = strdup(wordarr[i]);
+                 j++;
                }
             
 
