@@ -52,7 +52,8 @@ int main(int argc, char *argv[])
 
     char *line = NULL;
     size_t n = 0;
-    int background = 0;
+    char *array_to_feed[513];
+    int background = 1;
     pid_t spawnpid = -5;
     int bgChildStatus;
     int bg_child = 0;
@@ -67,6 +68,8 @@ mainloop:
         if(wordarr[z]) free(wordarr[z]);
         wordarr[z] = NULL;
       }
+
+      
 
       if (input == stdin){
         /*Check for Prompt String 1 aka PS1*/
@@ -91,15 +94,18 @@ mainloop:
       }
 
       if (line_length == -1){
-        printf("\n");
-        clearerr(input);
-        errno = 0;
-        continue;
+        if(errno == EINTR){
+          // error interrupt
+          printf("\n");
+          clearerr(stdin);
+          errno = 0;
+          continue;
+        }
       }
 
-      if (line_length < 0){
-        err(1, "%s", file_name);
-      }
+      //if (line_length < 0){
+      //  err(1, "%s", file_name);
+      //}
 
       // word split
       size_t num_words = wordsplit(line);
@@ -110,7 +116,6 @@ mainloop:
         wordarr[i] = expand_word;
         //fprintf(stderr, "%s\n", wordarr[i]);
         }
-      // parsing?
       
 
       // built in commands
@@ -174,7 +179,72 @@ exitjump:
             break;
 
           case 0:
-            execvp(wordarr[0], wordarr);
+            // parse for files to read, write, and append
+            // this is because you want to truncate repeat redirection operators
+            int n = 0; // index for array_to_feed
+            for(int i=0;i < num_words; i++){
+              // < "infile"
+              if (strcmp(wordarr[i], "<") == 0){
+                if(wordarr[i+1] != NULL){
+                  int letmein = open(wordarr[i+1], O_RDONLY);
+
+                  if (letmein == -1){
+                    fprintf(stderr, "infile open()\n");
+                    exit(1);
+                  }
+
+                  int resultIn = dup2(letmein, 0);
+                  if (resultIn == -1){
+                    fprintf(stderr, "infile dup2\n");
+                    exit(2);
+                  }
+                } 
+                i++;
+              } // > "outfile" 
+              else if(strcmp(wordarr[i], ">")==0){
+                if(wordarr[i+1] != NULL){
+                  int letmeout = open(wordarr[i+1], O_WRONLY | O_CREAT | O_TRUNC, 0777);
+                  if(letmeout == -1){
+                    fprintf(stderr, "outfile open()\n");
+                    exit(1);
+                  }
+                  int resultOut = dup2(letmeout, 1);
+                  if(resultOut == -1){
+                    fprintf(stderr, "outfile dup2\n");
+                    exit(2);
+                  }
+                } 
+                i++;
+              } // >> "appendTHIS"
+              else if(strcmp(wordarr[i], ">>") == 0){
+                if(wordarr[i+1] != NULL){
+                  int appendTHIS = open(wordarr[i+1], O_APPEND | O_CREAT | O_TRUNC, 0777);
+                  if(appendTHIS == -1){
+                    fprintf(stderr, "append file open()\n");
+                    exit(1);
+                  }
+                  int appendVal = dup2(appendTHIS, 1);
+                  if(appendVal == -1){
+                    fprintf(stderr, "append dup2\n");
+                      exit(2);
+                  }
+                }
+                i++;
+              } // & "background"
+               else if (strcmp(wordarr[i], "&")==0){
+                 background = 0; // flip on the flag
+
+               } else{
+                 // add to the clean array
+
+                 array_to_feed[n] = wordarr[i];
+                 n++;
+               }
+            
+
+            }
+
+            execvp(array_to_feed[0], array_to_feed);
             fprintf(stderr, "execvp failed\n");
             exit(EXIT_FAILURE);
             break;
@@ -305,6 +375,12 @@ char *expand(char const *word){
       build_str(smallsh_pid, NULL);
     } else if (ch == '?'){
       build_str(fg_exit, NULL);
+    } else if (ch == '{'){
+      char param_array[100] = {'\0'};
+      strncpy(param_array, start + 2, (end - 1) - (start + 2));
+      char* env_var = getenv(param_array);
+      if (env_var == NULL) build_str("", NULL);
+      else build_str(env_var, NULL);
     }
     position = end;
     ch = param_scan(position, &start, &end);
