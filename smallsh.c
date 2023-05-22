@@ -25,13 +25,20 @@ char *expand(char const *word);
 char *smallsh_pid = NULL;   // $$
 char *fg_exit = "0";        // $?
 char *bg_pid = "";          // $!
+struct sigaction old_sigint = {0}, old_sigtstp = {0}, ignore_signals = {0}, manage_sigint = {0};
 
+void handle_sigint(int sig){
+
+}
 
 
 int main(int argc, char *argv[])
 {
-
-    // file for non-interactive mode
+  ignore_signals.sa_handler = SIG_IGN;
+  manage_sigint.sa_handler = handle_sigint;
+  sigaction(SIGINT, &manage_sigint, &old_sigint);
+  sigaction(SIGTSTP, &ignore_signals, &old_sigtstp);
+// file for non-interactive mode
     FILE *input = stdin;
     char *file_name = "(stdin)";
 
@@ -60,9 +67,10 @@ int main(int argc, char *argv[])
     int mathResult = 0;
     int signum = 0;
     int j;
-
+    
     for (;;){
 mainloop:
+      sigaction(SIGINT, &manage_sigint, NULL);
       // background processes
       while((bg_child = waitpid(0, &bgChildStatus, WNOHANG | WUNTRACED)) > 0){
 
@@ -98,6 +106,7 @@ mainloop:
 
       /*Below reallocates the line*/
       ssize_t line_length = getline(&line, &n, input);
+      sigaction(SIGINT, &ignore_signals, NULL);
       // handle EOF here????
       if (feof(input)){
         goto exitjump;
@@ -197,6 +206,10 @@ exitjump:
             break;
 
           case 0:
+            // reset signals
+            sigaction(SIGINT, &old_sigint, NULL);
+            sigaction(SIGTSTP, &old_sigtstp, NULL);
+
             // parse for files to read, write, and append
             // this is because you want to truncate repeat redirection operators
             j = 0; // index for array_to_feed
