@@ -1,1 +1,2 @@
-# Small Shell Portfolio Project
+# Small Shell
+
