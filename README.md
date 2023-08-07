@@ -6,14 +6,21 @@ Smallsh: Custom Shell Implementation in C
 Smallsh is a self-made shell implemented in C, designed to emulate the behavior of popular shells like bash. It offers a command-line interface that includes functionalities such as input parsing, parameter expansion, built-in commands, redirection operators, background process execution, and signal handling.
 
 ## Features:
-> Interactive Prompt: Presents an interactive prompt for user input, providing a familiar command-line environment.
-> Command Parsing: Divides command line input into meaningful tokens, splitting words based on whitespace and managing special characters.
-> Parameter Expansion: Implements parameter expansion, supporting variables like $$ (process ID), $?, and $!.
-> Built-in Commands: Supports built-in commands such as 'exit' for shell termination and 'cd' for changing the working directory.
-> External Command Execution: Executes external commands using appropriate EXEC functions, searching for executables in the system's PATH.
-> Redirection Operators: Implements redirection operators (<, >, >>) to enable input and output stream redirection, enhancing command flexibility.
-> Background Execution: Facilitates background execution of commands using the '&' operator, enabling concurrent execution of multiple processes.
-> Signal Handling: Manages SIGINT (Ctrl+C) and SIGTSTP (Ctrl+Z) signals effectively, ensuring a responsive and user-friendly shell experience.
+> **Interactive Prompt:** Presents an interactive prompt for user input, providing a familiar command-line environment.
+> 
+> **Command Parsing:** Divides command line input into meaningful tokens, splitting words based on whitespace and managing special characters.
+>
+> **Parameter Expansion:** Implements parameter expansion, supporting variables like $$ (process ID), $?, and $!.
+>
+> **Built-in Commands:** Supports built-in commands such as 'exit' for shell termination and 'cd' for changing the working directory.
+>
+> **External Command Execution:** Executes external commands using appropriate EXEC functions, searching for executables in the system's PATH.
+>
+> **Redirection Operators:** Implements redirection operators (<, >, >>) to enable input and output stream redirection, enhancing command flexibility.
+>
+> **Background Execution:** Facilitates background execution of commands using the '&' operator, enabling concurrent execution of multiple processes.
+>
+> **Signal Handling:** Manages SIGINT (Ctrl+C) and SIGTSTP (Ctrl+Z) signals effectively, ensuring a responsive and user-friendly shell experience.
 
 ## Program Functionality:
 ### Smallsh operates within an infinite loop, performing the following steps:
