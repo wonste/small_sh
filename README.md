@@ -38,5 +38,5 @@ Smallsh is a self-made shell implemented in C, designed to emulate the behavior 
 **Error Handling:**
 > Smallsh robustly manages errors arising from standard library functions and issues informative error messages when needed.
 
-> **Note:**
+**Note:**
 > This shell project is focused on recreating fundamental shell functionalities and provides a fundamental understanding of process management, signal handling, and I/O redirection in Unix-like systems. It emphasizes C programming and standard system calls for achieving the desired features.
