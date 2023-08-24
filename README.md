@@ -27,10 +27,10 @@ Smallsh is a self-made shell implemented in C, designed to emulate the behavior 
 
 > Input: Reads user input from stdin or a script file, supporting both interactive and non-interactive modes.
 > Word Splitting: Divides input lines into words, accounting for whitespace characters and handling escape sequences.
-> Expansion: Expands variables like $$, $?, $!, and ${parameter} within words.
-> Parsing: Parses words into tokens, identifying redirection operators (>, <, >>) and the background operator (&).
+> Expansion: Expands variables like '$$', '$?', '$!', and '${parameter}' within words.
+> Parsing: Parses words into tokens, identifying redirection operators ('>', '<', '>>') and the background operator ('&').
 > Execution: Executes built-in commands like 'exit' and 'cd', as well as external commands in new child processes.
-> Waiting: Waits for foreground child processes to complete, updating the $? variable with exit status, and manages background processes.
+> Waiting: Waits for foreground child processes to complete, updating the '$?' variable with exit status, and manages background processes.
 
 ### Signal Handling:
 > SIGTSTP signal is disregarded, allowing background processes to continue running without interruption.
